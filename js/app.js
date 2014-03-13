@@ -3,11 +3,12 @@ define(function (require) {
   var WeatherConditions = require('models/weather-conditions');
   var Forecast = require('collections/forecast');
   var CurrentWeatherView = require('views/current-weather');
-
+  var ForecastView = require('views/forecast');
+  var Router = require('router');
   var app = {};
 
   var latLong = "45.5330,-122.6894";
-  var apiKey = "a981b48f64d44549870777bac4da560d";
+  var apiKey = "accc92eb275ed07d3e4b606d113feefe";
   var url = 'https://api.forecast.io/forecast'
 
   $.getJSON(url + '/' + apiKey + '/' + latLong + '?callback=?')
@@ -16,14 +17,24 @@ define(function (require) {
    });
 
   function main (data) {
-    console.log(data);
+    
+    $('#loading-message').text('Your weather is now!');
+
     var currentWeatherModel = new WeatherConditions(data.currently);
-    var dailyForcastCollection = new Forecast(data.daily.data);
+    var dailyForecastCollection = new Forecast(data.daily.data);
 
     var currentWeatherView = new CurrentWeatherView({model: currentWeatherModel});
+    var forecastView = new ForecastView({collection: dailyForecastCollection})
+
+    var router = new Router({
+      current: currentWeatherView,
+      forecast: forecastView
+    });
+
+    Backbone.history.start();
 
     app.current = currentWeatherModel;
-    app.forecast = dailyForcastCollection;
+    app.forecast = dailyForecastCollection;
   }
 
   window.app = app;
